@@ -7,9 +7,10 @@ def parse_args():
     parser.add_argument('-t', help='Train[t] or predict[p]', required=True)
     parser.add_argument('-d', help='Dataset path', required=True)
     parser.add_argument('-m', help='Path to load or save model. Usage: path/to/model', required=True)
+    parser.add_argument('-max', help='Max number of training epochs', required=True)
     args = parser.parse_args()
 
-    return args.t, args.d, args.m
+    return args.t, args.d, args.m, int(args.max)
 
 def load(path):
 
@@ -26,7 +27,7 @@ def load_model(nn, model_path):
     W = np.load(model_path)['w']
     nn.W = W
 
-def train(nn, X, Y):
+def train(nn, X, Y, max_epochs):
     
     convergence = 0
     num_inputs =  X.shape[0]
@@ -39,11 +40,14 @@ def train(nn, X, Y):
             correct = nn.update(x, y)
             if correct:
                 convergence +=1 
-
+        
         if convergence < num_inputs:
-            convergence = 0
             num_training += 1
-
+            if num_training == max_epochs:
+                print(f'This model failed to converge after {num_training} epochs')
+                return
+            convergence = 0
+        
     print(f'This perceptron was trained for {num_training} epochs')
 
 def predict(nn, X, Y):
@@ -62,7 +66,7 @@ def predict(nn, X, Y):
 def main(**kwargs):
     
     # Parse arguments
-    type, data_path, model_path = parse_args()
+    type, data_path, model_path, max_epochs = parse_args()
     
     # Load data
     X, Y = load(data_path)
@@ -76,7 +80,7 @@ def main(**kwargs):
 
     # Train or predict
     if type == 't':
-        train(nn, X, Y)
+        train(nn, X, Y, max_epochs)
         save_model(nn, model_path)
     else:
         load_model(nn, model_path)
