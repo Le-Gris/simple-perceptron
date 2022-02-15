@@ -32,6 +32,7 @@ def train(nn, X, Y):
     num_inputs =  X.shape[0]
 
     # Train until convergence is achieved
+    num_training = 0
     while convergence != num_inputs:
         for x, y in zip(X, Y):
             nn.predict(x)
@@ -41,6 +42,9 @@ def train(nn, X, Y):
 
         if convergence < num_inputs:
             convergence = 0
+            num_training += 1
+
+    print(f'This perceptron was trained for {num_training} epochs')
 
 def predict(nn, X, Y):
     
