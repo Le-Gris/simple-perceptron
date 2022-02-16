@@ -12,12 +12,17 @@ def parse_args():
 
     return args.t, args.d, args.m, int(args.max)
 
-def load(path):
+def load_data(path):
 
     data = np.load(path)
+
     X = data['X']
     Y = data['Y']
-
+    
+    # Add bias term
+    biases = np.ones((X.shape[0], 1))
+    X = np.block([biases, X])
+    
     return X, Y
 
 def save_model(nn, model_path):
@@ -31,11 +36,12 @@ def train(nn, X, Y, max_epochs):
     
     convergence = 0
     num_inputs =  X.shape[0]
-
+    
     # Train until convergence is achieved
     num_training = 0
     while convergence != num_inputs:
         for x, y in zip(X, Y):
+            x = np.expand_dims(x, axis=1)
             nn.predict(x)
             correct = nn.update(x, y)
             if correct:
@@ -50,11 +56,12 @@ def train(nn, X, Y, max_epochs):
         
     print(f'This perceptron was trained for {num_training} epochs')
 
-def predict(nn, X, Y):
+def test(nn, X, Y):
     
     correct = 0
     # Predict labels
     for x, y in zip(X, Y):
+        x = np.expand_dims(x, axis=1)
         y_pred = nn.predict(x)
         if y_pred == y:
             correct += 1
@@ -69,22 +76,22 @@ def main(**kwargs):
     type, data_path, model_path, max_epochs = parse_args()
     
     # Load data
-    X, Y = load(data_path)
+    X, Y = load_data(data_path)
     
     # Get input and output shape
     in_size = X.shape[1]
     out_size = 1
-
+    
     # Initialize perceptron
     nn = p.Perceptron(in_size, out_size)
 
     # Train or predict
-    if type == 't':
+    if type == 'train':
         train(nn, X, Y, max_epochs)
         save_model(nn, model_path)
-    else:
+    elif type == 'test':
         load_model(nn, model_path)
-        predict(nn, X, Y)
+        test(nn, X, Y)
 
 if __name__ == '__main__':
     main()

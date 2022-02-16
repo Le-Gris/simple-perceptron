@@ -5,14 +5,14 @@ class Perceptron:
     def __init__(self, num_inputs, num_outputs):
         
         # Initialize weights
-        self.W = np.random.uniform((num_inputs, num_outputs))
-        
+        self.W = np.random.uniform(size=(num_inputs, num_outputs))
+    
         # Initialize prediction
         self.y_pred = np.zeros(num_outputs)
         
     def predict(self, x):
         # Weight input dot product
-        y_pred = np.dot(self.W.T, x)
+        y_pred = self.W.T@x
         
         # Neuron activation
         self.y_pred = self.activation(y_pred)
